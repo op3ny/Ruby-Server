@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site de Teste</title>
+
+  <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+
+    function deleteCookie(name) {
+      document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; secure; samesite=strict`;
+    }
+
+    (async function () {
+      const tokenAES = getCookie("tokenAES");
+
+      if (tokenAES) {
+        try {
+          const response = await fetch(
+            `/login?tokenReg=${encodeURIComponent(tokenAES)}`
+          );
+          const data = await response.json();
+
+          if (data.status === "Error") {
+            deleteCookie("tokenAES");
+            window.location.href = "/login.html";
+          }
+        } catch (error) {
+          console.error("Erro ao validar o tokenAES:", error);
+          deleteCookie("tokenAES");
+          window.location.href = "/login.html";
+        }
+      } else {
+        window.location.href = "/login.html";
+      }
+    })();
+  </script>
+
+</head>
+
+<body>
+  <h1>puts "Hello World"</h1>
+  <h3>Olá, bem-vindo(a) ao site de teste, na verdade um lugar onde só pessoas legais e autenticadas podem entrar, então sente-se para tomar um cafézinho, e talvez pegar pedras preciosas como um Diamante ou um Rubi</h3>
+  <p>Inclusive você sabia que o Rubi vale mais que um Diamante no mercado, pois são mais raros!</p>
+</body>
+
+</html>

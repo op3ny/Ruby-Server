@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<script>
+    // Função para obter um cookie pelo nome
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function deleteCookie(name) {
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; secure; samesite=strict`;
+    }
+
+    (async function () {
+        const tokenAES = getCookie('tokenAES');
+
+        if (tokenAES) {
+            try {
+                const response = await fetch(`/login?tokenReg=${encodeURIComponent(tokenAES)}`);
+                const data = await response.json();
+
+                if (data.status === "Error") {
+                    deleteCookie('tokenAES');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Erro ao validar o tokenAES:', error);
+                deleteCookie('tokenAES');
+                window.location.href = '/login.html';
+            }
+        } else {
+            window.location.href = '/login.html';
+        }
+    })();
+</script>
+
+
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout - Ruby Auth</title>
+    
+</head>
+
+<body>
+    <div class="container">
+        <h2>Bah tchê, estamos tiramos sua autenticação, espera mais um pouquitcho pra nois conseguir te desconectar!</h2>
+      
+    </div>
+
+    <script>
+       
+        setTimeout(function () {
+            document.cookie = "tokenAES=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+            window.location.href = '/login.html';
+        }, 5000);
+    </script>
+</body>
+
+</html>

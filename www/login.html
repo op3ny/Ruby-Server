@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <script>
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+      }
+
+      function deleteCookie(name) {
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; secure; samesite=strict`;
+      }
+
+      (async function () {
+        const tokenAES = getCookie("tokenAES");
+
+        if (tokenAES) {
+          try {
+            const response = await fetch(
+              `/login?tokenReg=${encodeURIComponent(tokenAES)}`
+            );
+            const data = await response.json();
+
+            if (data.status === "Success") {
+              alert(
+                "Opa, você tem uma conta definida, deseja continuar com ela ou autenticar-se com outra? (Confirme para continuar)"
+              );
+              alert(
+                "Saiba que ao continuar, sua conta atual será desconectada. (Confirme para continuar)"
+              );
+              window.location.href = "/logout.html";
+            }
+          } catch (error) {}
+        } else {
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div>
+      <h2>RubyAuth</h2>
+      <p>Faça login para continuar</p>
+
+      <form id="login-form">
+        <div>
+          <label for="email">E-mail</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Digite seu e-mail"
+            required
+          />
+        </div>
+
+        <div>
+          <label for="password">Senha</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Digite sua senha"
+            required
+          />
+        </div>
+
+        <button type="submit">Login</button>
+
+        <div id="error-message"></div>
+        <div id="sucess-message"></div>
+      </form>
+
+      <div>
+        <a href="/register.html">Registrar</a>
+      </div>
+    </div>
+
+    <div id="accountModal" style="display: none;">
+      <div>
+        <p>Você já tem uma conta?</p>
+        <div>
+          <button id="yesButton">Sim</button>
+          <button id="noButton">Não</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const errorMessage = document.getElementById('error-message');
+      const sucessMessage = document.getElementById('sucess-message');
+      errorMessage.textContent = '';
+      sucessMessage.textContent = '';
+
+      document.getElementById('login-form').addEventListener('submit', async function (event) {
+          event.preventDefault();
+
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+
+          try {
+              const crypt1Response = await fetch(`/crypt1?email=${encodeURIComponent(email)}&senha=${encodeURIComponent(password)}`);
+              const crypt1Data = await crypt1Response.json();
+
+              if (!crypt1Data.jwtToken) {
+                  throw new Error('Erro ao conseguir o token um!');
+              }
+
+              const crypt2Response = await fetch(`/crypt2?email=${encodeURIComponent(email)}&senha=${encodeURIComponent(password)}&crypt1=${encodeURIComponent(crypt1Data.jwtToken)}`);
+              const crypt2Data = await crypt2Response.json();
+
+              if (!crypt2Data.tokenAES) {
+                  throw new Error('Erro ao conseguir o token AES do crypt2!');
+              }
+
+              const registerResponse = await fetch(`/login?tokenReg=${encodeURIComponent(crypt2Data.tokenAES)}`);
+              const registerData = await registerResponse.json();
+
+              if (registerData.status === 'Error') {
+                  errorMessage.textContent = registerData.log;
+              } else if (registerData.status === 'Success') {
+                  errorMessage.textContent = '';
+                  sucessMessage.textContent = "Login realizado com sucesso! Estamos te redirecionando, espere um pouquinho...";
+                  document.cookie = `tokenAES=${encodeURIComponent(crypt2Data.tokenAES)}; path=/; secure; samesite=None; max-age=86400`;
+                  setTimeout(() => {
+                      window.location.href = '/html';
+                  }, 2000);
+              } else {
+                  errorMessage.textContent = '';
+                  errorMessage.textContent = 'Poxa, estamos com erros tecnicos, tente novamente mais tarde.';
+              }
+          } catch (error) {
+              console.error('Erro durante o processo:', error);
+              errorMessage.textContent = '';
+              errorMessage.textContent = 'Vixx, aconteceu uns baguio ae, tente novamente mais tarde.';
+          }
+      });
+    </script>
+  </body>
+</html>
