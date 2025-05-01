@@ -1,3 +1,8 @@
+# Aviso
+Esse projeto foi inspirado no [Hsyst Auth](https://github.com/Hsyst/Hsyst-Auth).
+
+## Criador desta versão: [PedroDev](https://github.com/pedrodevelopagens)
+
 # Ruby Auth by PedroDev
 
 Olá, isso aqui é um projeto Ruby, sim Ruby, eu adoro Ruby, inclusive vai ser o primeiro projeto Ruby do meu GitHub então vai ser importante pra mim!
